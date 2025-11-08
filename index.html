@@ -5,342 +5,372 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>School is Cool</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      width: 100vw;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      font-family: Arial, sans-serif;
-      box-sizing: border-box;
-      overscroll-behavior-y: contain;
-      touch-action: pan-x pan-y;
-    }
+      /* Reset global des marges pour enlever toutes les marges par défaut */
+      * {
+          margin: 0;
+      }
 
-    h1 {
-      color: white;
-      margin: 10px 0;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      font-size: clamp(24px, 4vw, 32px);
-    }
+      body {
+          margin: 0;
+          padding: 0;
+          height: 100vh; /* fixé à 100vh demandé */
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          /* min-height remplacé par height pour un contrôle strict */
+          width: 100vw;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          font-family: Arial, sans-serif;
+          box-sizing: border-box;
+          overscroll-behavior-y: contain;
+          touch-action: pan-x pan-y;
+      }
 
-    .game-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 10px;
-      padding: 10px;
-      width: 100%;
-      box-sizing: border-box;
-      min-height: 100vh;
-    }
+      h1 {
+          color: white;
+          margin: 0; /* supprimé la marge */
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+          font-size: clamp(24px, 4vw, 32px);
+      }
 
-    #gameContainer {
-      position: relative;
-      display: inline-block;
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      width: min(95vw, 600px);
-      height: auto;
-      aspect-ratio: 1/1;
-      overflow: hidden;
-      touch-action: none;
-    }
+      .game-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 20px; /* spacing géré par gap */
+          padding: 10px;
+          width: 100%;
+          box-sizing: border-box;
+          height: 100%; /* occupe toute la hauteur du body */
+      }
 
-    .level-selector {
-      background: white;
-      padding: 15px 25px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
+      /* Le container prend l'espace restant pour que la grille puisse s'adapter */
+      #gameContainer {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 1 1 auto; /* prend l'espace restant */
+          width: fit-content;
+          max-width: 100%;
+          background: white;
+          padding: 10px;
+          border-radius: 10px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+          overflow: hidden;
+          touch-action: none;
+      }
 
-    .level-selector label {
-      font-weight: bold;
-      color: #667eea;
-    }
+      /* La table doit occuper tout l'espace disponible du container */
+      #grid {
+          width: 100%;
+          height: 100%;
+          border-collapse: collapse;
+          background: #ffffff;
+          table-layout: fixed;
+      }
 
-    .level-selector select {
-      padding: 8px 15px;
-      border: 2px solid #667eea;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      background: white;
-      color: #667eea;
-      font-weight: bold;
-    }
+      .level-selector {
+          background: white;
+          padding: 15px 25px;
+          border-radius: 10px;
+          margin-bottom: 0; /* suppression de la marge */
+          box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+          display: flex;
+          gap: 20px; /* spacing augmenté à 20px */
+          align-items: center;
+      }
 
-    .level-selector select:hover {
-      background: #f0f0ff;
-    }
+      .level-selector label {
+          font-weight: bold;
+          color: #667eea;
+          margin: 0;
+      }
 
-    .info {
-      color: white;
-      margin-bottom: 20px;
-      font-size: 18px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    }
+      .level-selector select {
+          padding: 8px 15px;
+          border: 2px solid #667eea;
+          border-radius: 5px;
+          font-size: 16px;
+          cursor: pointer;
+          background: white;
+          color: #667eea;
+          font-weight: bold;
+      }
+
+      .level-selector select:hover {
+          background: #f0f0ff;
+      }
+
+      .info {
+          color: white;
+          margin: 0; /* suppression des marges */
+          font-size: 18px;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          gap: 20px; /* espacement géré par gap */
+      }
 
 
-    #grid {
-      border-collapse: collapse;
-      background: #ffffff;
-      width: 100%;
-      height: 100%;
-    }
+      #grid {
+          border-collapse: collapse;
+          background: #ffffff;
+          width: 100%;
+          height: 100%;
+      }
 
-    td {
-      border: 1px solid #99ccff;
-      text-align: center;
-      vertical-align: middle;
-      position: relative;
-      padding: 0;
-    }
-    
-    td.ice-tile {
-      background: 
-        repeating-linear-gradient(
-          45deg,
-          #d4f1ff 0px,
-          #d4f1ff 3px,
-          #e6f7ff 3px,
-          #e6f7ff 6px,
-          #d4f1ff 6px,
-          #d4f1ff 9px,
-          #b3e5ff 9px,
-          #b3e5ff 12px
-        );
-      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
-    }
+      td {
+          border: 1px solid #99ccff;
+          text-align: center;
+          vertical-align: middle;
+          position: relative;
+          padding: 0;
+      }
 
-    td.house-cell {
-      background: #90EE90;
-      border: 1px solid #7CC77C;
-    }
+      td.ice-tile {
+          background:
+                  repeating-linear-gradient(
+                          45deg,
+                          #d4f1ff 0px,
+                          #d4f1ff 3px,
+                          #e6f7ff 3px,
+                          #e6f7ff 6px,
+                          #d4f1ff 6px,
+                          #d4f1ff 9px,
+                          #b3e5ff 9px,
+                          #b3e5ff 12px
+                  );
+          box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+      }
 
-    td.rock {
-      background: 
-        repeating-linear-gradient(
-          45deg,
-          #d4f1ff 0px,
-          #d4f1ff 3px,
-          #e6f7ff 3px,
-          #e6f7ff 6px,
-          #d4f1ff 6px,
-          #d4f1ff 9px,
-          #b3e5ff 9px,
-          #b3e5ff 12px
-        );
-      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
-    }
+      td.house-cell {
+          background: #90EE90;
+          border: 1px solid #7CC77C;
+      }
 
-    td.exit {
-      background: #ffd700;
-      animation: pulse 1s infinite;
-    }
+      td.rock {
+          background:
+                  repeating-linear-gradient(
+                          45deg,
+                          #d4f1ff 0px,
+                          #d4f1ff 3px,
+                          #e6f7ff 3px,
+                          #e6f7ff 6px,
+                          #d4f1ff 6px,
+                          #d4f1ff 9px,
+                          #b3e5ff 9px,
+                          #b3e5ff 12px
+                  );
+          box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+      }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
+      td.exit {
+          background: #ffd700;
+          animation: pulse 1s infinite;
+      }
 
-    .player {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      left: 0;
-      top: 0;
-      transition: transform 250ms ease-out;
-      z-index: 10;
-      width: 100%;
-      height: 100%;
-    }
+      @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+      }
 
-    #victoryMessage {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-      text-align: center;
-      z-index: 100;
-      animation: popIn 0.3s ease-out;
-    }
+      .player {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: none;
+          left: 0;
+          top: 0;
+          transition: transform 250ms ease-out;
+          z-index: 10;
+          width: 100%;
+          height: 100%;
+      }
 
-    @keyframes popIn {
-      0% { transform: translate(-50%, -50%) scale(0); }
-      100% { transform: translate(-50%, -50%) scale(1); }
-    }
+      #victoryMessage {
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: white;
+          padding: 40px;
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+          text-align: center;
+          z-index: 100;
+          animation: popIn 0.3s ease-out;
+          gap: 20px; /* espacement interne augmenté à 20px */
+      }
 
-    #victoryMessage h2 {
-      color: #667eea;
-      margin: 0 0 20px 0;
-      font-size: 32px;
-    }
+      @keyframes popIn {
+          0% { transform: translate(-50%, -50%) scale(0); }
+          100% { transform: translate(-50%, -50%) scale(1); }
+      }
 
-    #victoryMessage button {
-      background: #667eea;
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      font-size: 18px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.3s;
-      margin: 5px;
-      outline: none;
-    }
+      #victoryMessage h2 {
+          color: #667eea;
+          margin: 0; /* suppression de la marge */
+          font-size: 32px;
+      }
 
-    #victoryMessage button:hover, #victoryMessage button:focus {
-      background: #764ba2;
-      box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.3);
-    }
+      #victoryMessage button {
+          background: #667eea;
+          color: white;
+          border: none;
+          padding: 15px 30px;
+          font-size: 18px;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: background 0.3s;
+          margin: 5px;
+          outline: none;
+      }
 
-    .controls {
-      color: white;
-      margin-top: 20px;
-      text-align: center;
-    }
+      #victoryMessage button:hover, #victoryMessage button:focus {
+          background: #764ba2;
+          box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.3);
+      }
 
-    .controls p {
-      margin: 5px 0;
-    }
+      .controls {
+          color: white;
+          margin: 0; /* suppression de la marge */
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          gap: 20px; /* espacement géré par gap */
+          align-items: center;
+      }
 
-    .difficulty-badge {
-      display: inline-block;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-weight: bold;
-      margin-left: 10px;
-    }
+      .controls p {
+          margin: 0;
+      }
 
-    .easy { background: #90EE90; color: #2d5016; }
-    .medium { background: #FFD700; color: #665200; }
-    .hard { background: #FF6B6B; color: #660000; }
+      .difficulty-badge {
+          display: inline-block;
+          padding: 5px 15px;
+          border-radius: 20px;
+          font-weight: bold;
+          margin-left: 0; /* supprimer marge à gauche */
+      }
 
-    .solution-path {
-      background: rgba(144, 238, 144, 0.6) !important;
-      transition: all 0.5s ease;
-    }
+      .easy { background: #90EE90; color: #2d5016; }
+      .medium { background: #FFD700; color: #665200; }
+      .hard { background: #FF6B6B; color: #660000; }
 
-    .button-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-top: 15px;
-    }
+      .solution-path {
+          background: rgba(144, 238, 144, 0.6) !important;
+          transition: all 0.5s ease;
+      }
 
-    .game-button {
-      padding: 12px 25px;
-      font-size: 16px;
-      background: white;
-      color: #667eea;
-      border: 2px solid white;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: all 0.3s;
-      flex: 1;
-      min-width: 180px;
-      max-width: 200px;
-    }
+      .button-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 20px; /* spacing augmenté à 20px */
+          margin-top: 0; /* suppression de la marge */
+      }
 
-    .game-button:hover {
-      background: #667eea;
-      color: white;
-      transform: translateY(-2px);
-    }
+      .game-button {
+          padding: 12px 25px;
+          font-size: 16px;
+          background: white;
+          color: #667eea;
+          border: 2px solid white;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: bold;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+          transition: all 0.3s;
+          flex: 1;
+          min-width: 180px;
+          max-width: 200px;
+          margin: 0;
+          text-wrap: nowrap;
+      }
 
-    .game-button.solution {
-      background: #ff4444;
-      color: white;
-      border-color: #ff4444;
-    }
+      .game-button:hover {
+          background: #667eea;
+          color: white;
+          transform: translateY(-2px);
+      }
 
-    .game-button.solution:hover {
-      background: white;
-      color: #ff4444;
-    }
+      .game-button.solution {
+          background: #ff4444;
+          color: white;
+          border-color: #ff4444;
+      }
 
-    .solution-player {
-      color: gold;
-      text-shadow: 0 0 5px rgba(0,0,0,0.5);
-      transition: transform 500ms ease;
-    }
+      .game-button.solution:hover {
+          background: white;
+          color: #ff4444;
+      }
+
+      .solution-player {
+          color: gold;
+          text-shadow: 0 0 5px rgba(0,0,0,0.5);
+          transition: transform 500ms ease;
+      }
   </style>
 </head>
 <body>
-  <div class="game-wrapper">
-    <h1>🧑‍💼 School is Cool 🏫</h1>
+<div class="game-wrapper">
+  <h1>🧑‍💼 School is Cool 🏫</h1>
 
-    <div class="level-selector">
-      <label for="levelSelect">Niveau :</label>
-      <select id="levelSelect" onchange="changeLevel()">
-        <option value="1">Niveau 1 - Facile (10×10)</option>
-        <option value="2">Niveau 2 - Moyen (15×15)</option>
-        <option value="3">Niveau 3 - Difficile (20×20)</option>
-      </select>
-    </div>
+  <div class="level-selector">
+    <label for="levelSelect">Niveau :</label>
+    <select id="levelSelect" onchange="changeLevel()">
+      <option value="1">Niveau 1 - Facile (10×10)</option>
+      <option value="2">Niveau 2 - Moyen (15×15)</option>
+      <option value="3">Niveau 3 - Difficile (20×20)</option>
+    </select>
+  </div>
 
-    <div class="info">
-      Déplacements: <span id="moves">0</span>
-      <span id="difficultyBadge" class="difficulty-badge easy">FACILE</span>
-    </div>
+  <div class="info">
+    Déplacements: <span id="moves">0</span>
+    <span id="difficultyBadge" class="difficulty-badge easy">FACILE</span>
+  </div>
 
-    <div id="gameContainer">
-      <table id="grid"></table>
-    </div>
+  <div id="gameContainer">
+    <table id="grid"></table>
+  </div>
 
-    <div class="controls">
+  <div class="controls">
+    <div>
+
       <p>🎮 Utilisez les flèches du clavier pour vous déplacer</p>
       <p>⚠️ Attention : vous glissez sur la glace jusqu'au prochain obstacle !</p>
-      <div class="button-container">
-        <button class="game-button" onclick="regenerateLevel()">
-          🔄 Nouvelle grille
-        </button>
-        <button class="game-button solution" onclick="showSolution()">
-          🦸 Solution
-        </button>
-      </div>
     </div>
-
-    <div id="victoryMessage">
-      <h2>🎉 Bravo ! Vous avez atteint l'école ! 🎉</h2>
-      <p>Nombre de déplacements : <span id="finalMoves"></span></p>
-      <p>Difficulté : <span id="finalDifficulty"></span></p>
-      <div style="display: flex; gap: 10px; justify-content: center;">
-        <button id="btnNextLevel" onclick="nextLevel()">Niveau suivant</button>
-        <button id="btnRestart" onclick="regenerateLevel(); document.getElementById('victoryMessage').style.display = 'none';">Recommencer</button>
-      </div>
+    <div class="button-container">
+      <button class="game-button" onclick="regenerateLevel()">
+        🔄 Nouvelle grille
+      </button>
+      <button class="game-button solution" onclick="showSolution()">
+        🦸 Solution
+      </button>
     </div>
   </div>
 
-  <script>
-    const GRID_SIZE_PX = 600; // Taille fixe de la grille en pixels
-    
+  <div id="victoryMessage">
+    <h2>🎉 Bravo ! Vous avez atteint l'école ! 🎉</h2>
+    <p>Nombre de déplacements : <span id="finalMoves"></span></p>
+    <p>Difficulté : <span id="finalDifficulty"></span></p>
+    <div style="display: flex; gap: 20px; justify-content: center;">
+      <button id="btnNextLevel" onclick="nextLevel()">Niveau suivant</button>
+      <button id="btnRestart" onclick="regenerateLevel(); document.getElementById('victoryMessage').style.display = 'none';">Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<script>
     const LEVELS = {
-      1: { size: 10, rocks: 15, name: "Facile", class: "easy" },
-      2: { size: 15, rocks: 35, name: "Moyen", class: "medium" },
-      3: { size: 20, rocks: 60, name: "Difficile", class: "hard" }
+        1: { size: 10, rocks: 15, name: "Facile", class: "easy" },
+        2: { size: 15, rocks: 35, name: "Moyen", class: "medium" },
+        3: { size: 20, rocks: 60, name: "Difficile", class: "hard" }
     };
 
     let currentLevel = 1;
@@ -358,509 +388,519 @@
     let bufferedMove = null;
 
     function calculateCellSize() {
-      const container = document.getElementById('gameContainer');
-      const containerSize = container.clientWidth - 20; // 20px pour le padding
-      CELL_SIZE = Math.floor(containerSize / (SIZE + 1)); // +1 pour la colonne de la maison
+        const container = document.getElementById('gameContainer');
+        const styleComputed = getComputedStyle(container);
+        const padX = parseFloat(styleComputed.paddingLeft || 0) + parseFloat(styleComputed.paddingRight || 0);
+        const padY = parseFloat(styleComputed.paddingTop || 0) + parseFloat(styleComputed.paddingBottom || 0);
 
-      const style = document.createElement('style');
-      style.id = 'dynamic-cell-size';
-      const oldStyle = document.getElementById('dynamic-cell-size');
-      if (oldStyle) oldStyle.remove();
-      
-      const fontSize = Math.max(12, Math.floor(CELL_SIZE * 0.7));
-      style.textContent = `
-        td { 
-          width: ${CELL_SIZE}px; 
-          height: ${CELL_SIZE}px; 
+        const availableWidth = Math.max(0, container.clientWidth - padX);
+        const availableHeight = Math.max(0, container.clientHeight - padY);
+
+        // Calculer la taille de cellule maximale qui tient à la fois en largeur et en hauteur.
+        const cellW = Math.floor(availableWidth / (SIZE + 1)); // +1 pour la colonne de la maison
+        const cellH = Math.floor(availableHeight / SIZE);
+        CELL_SIZE = Math.max(12, Math.min(cellW, cellH));
+
+        const style = document.createElement('style');
+        style.id = 'dynamic-cell-size';
+        const oldStyle = document.getElementById('dynamic-cell-size');
+        if (oldStyle) oldStyle.remove();
+
+        const fontSize = Math.max(12, Math.floor(CELL_SIZE * 0.7));
+        style.textContent = `
+        td {
+          width: ${CELL_SIZE}px;
+          height: ${CELL_SIZE}px;
           font-size: ${fontSize}px;
         }
         #grid {
           width: ${(SIZE + 1) * CELL_SIZE}px;
           height: ${SIZE * CELL_SIZE}px;
+          margin: 0 auto; /* centrer la grille si espace disponible */
         }
       `;
-      document.head.appendChild(style);
+        document.head.appendChild(style);
     }
 
     function regenerateLevel() {
-      moves = 0;
-      document.getElementById('moves').textContent = moves;
-      isMoving = false;
-      bufferedMove = null;
-      initGame();
+        moves = 0;
+        document.getElementById('moves').textContent = moves;
+        isMoving = false;
+        bufferedMove = null;
+        initGame();
     }
 
     function changeLevel() {
-      const select = document.getElementById('levelSelect');
-      currentLevel = parseInt(select.value);
-      SIZE = LEVELS[currentLevel].size;
-      ROCK_COUNT = LEVELS[currentLevel].rocks;
-      moves = 0;
-      document.getElementById('moves').textContent = moves;
-      
-      // Mettre à jour le badge de difficulté
-      const badge = document.getElementById('difficultyBadge');
-      badge.textContent = LEVELS[currentLevel].name.toUpperCase();
-      badge.className = 'difficulty-badge ' + LEVELS[currentLevel].class;
-      
-      calculateCellSize();
-      initGame();
+        const select = document.getElementById('levelSelect');
+        currentLevel = parseInt(select.value);
+        SIZE = LEVELS[currentLevel].size;
+        ROCK_COUNT = LEVELS[currentLevel].rocks;
+        moves = 0;
+        document.getElementById('moves').textContent = moves;
+
+        // Mettre à jour le badge de difficulté
+        const badge = document.getElementById('difficultyBadge');
+        badge.textContent = LEVELS[currentLevel].name.toUpperCase();
+        badge.className = 'difficulty-badge ' + LEVELS[currentLevel].class;
+
+        calculateCellSize();
+        initGame();
     }
 
     function nextLevel() {
-      if (currentLevel < 3) {
-        currentLevel++;
-        document.getElementById('levelSelect').value = currentLevel;
-        changeLevel();
-        document.getElementById('victoryMessage').style.display = 'none';
-      } else {
-        alert('🎊 Félicitations ! Vous avez terminé tous les niveaux ! 🎊');
-        location.reload();
-      }
+        if (currentLevel < 3) {
+            currentLevel++;
+            document.getElementById('levelSelect').value = currentLevel;
+            changeLevel();
+            document.getElementById('victoryMessage').style.display = 'none';
+        } else {
+            alert('🎊 Félicitations ! Vous avez terminé tous les niveaux ! 🎊');
+            location.reload();
+        }
     }
 
     function canReachExit() {
-      const visited = new Set();
-      const queue = [{x: playerPos.x, y: playerPos.y}];
-      visited.add(`${playerPos.x},${playerPos.y}`);
-      
-      const directions = [
-        {dx: 0, dy: -1},
-        {dx: 0, dy: 1},
-        {dx: -1, dy: 0},
-        {dx: 1, dy: 0}
-      ];
-      
-      while (queue.length > 0) {
-        const current = queue.shift();
-        
-        if (current.x === exitPos.x && current.y === exitPos.y) {
-          return true;
-        }
-        
-        for (const dir of directions) {
-          let newX = current.x;
-          let newY = current.y;
-          
-          while (true) {
-            const nextX = newX + dir.dx;
-            const nextY = newY + dir.dy;
-            
-            if (!isValidPosition(nextX, nextY) || isRock(nextX, nextY)) {
-              break;
+        const visited = new Set();
+        const queue = [{x: playerPos.x, y: playerPos.y}];
+        visited.add(`${playerPos.x},${playerPos.y}`);
+
+        const directions = [
+            {dx: 0, dy: -1},
+            {dx: 0, dy: 1},
+            {dx: -1, dy: 0},
+            {dx: 1, dy: 0}
+        ];
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+
+            if (current.x === exitPos.x && current.y === exitPos.y) {
+                return true;
             }
-            
-            newX = nextX;
-            newY = nextY;
-          }
-          
-          const key = `${newX},${newY}`;
-          if (!visited.has(key)) {
-            visited.add(key);
-            queue.push({x: newX, y: newY});
-          }
+
+            for (const dir of directions) {
+                let newX = current.x;
+                let newY = current.y;
+
+                while (true) {
+                    const nextX = newX + dir.dx;
+                    const nextY = newY + dir.dy;
+
+                    if (!isValidPosition(nextX, nextY) || isRock(nextX, nextY)) {
+                        break;
+                    }
+
+                    newX = nextX;
+                    newY = nextY;
+                }
+
+                const key = `${newX},${newY}`;
+                if (!visited.has(key)) {
+                    visited.add(key);
+                    queue.push({x: newX, y: newY});
+                }
+            }
         }
-      }
-      
-      return false;
+
+        return false;
     }
 
     function initGame() {
-      playerPos = { x: 0, y: Math.floor(SIZE / 2) };
-      exitPos = { x: SIZE - 1, y: Math.floor(Math.random() * SIZE) };
-      
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
-      cells = {};
+        playerPos = { x: 0, y: Math.floor(SIZE / 2) };
+        exitPos = { x: SIZE - 1, y: Math.floor(Math.random() * SIZE) };
 
-      let attempts = 0;
-      do {
-        rocks.clear();
-        while (rocks.size < ROCK_COUNT) {
-          const x = Math.floor(Math.random() * SIZE);
-          const y = Math.floor(Math.random() * SIZE);
-          const key = `${x},${y}`;
-          
-          if ((x === playerPos.x && y === playerPos.y) || 
-              (x === exitPos.x && y === exitPos.y)) {
-            continue;
-          }
-          
-          rocks.add(key);
-        }
-        attempts++;
-      } while (!canReachExit() && attempts < 100);
-      
-      if (attempts >= 100) {
-        rocks.clear();
-        let reducedCount = Math.floor(ROCK_COUNT * 0.7);
-        while (rocks.size < reducedCount) {
-          const x = Math.floor(Math.random() * SIZE);
-          const y = Math.floor(Math.random() * SIZE);
-          const key = `${x},${y}`;
-          
-          if ((x === playerPos.x && y === playerPos.y) || 
-              (x === exitPos.x && y === exitPos.y)) {
-            continue;
-          }
-          
-          rocks.add(key);
-        }
-      }
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        cells = {};
 
-      // Recalculer les tailles avant de créer la grille
-      calculateCellSize();
+        let attempts = 0;
+        do {
+            rocks.clear();
+            while (rocks.size < ROCK_COUNT) {
+                const x = Math.floor(Math.random() * SIZE);
+                const y = Math.floor(Math.random() * SIZE);
+                const key = `${x},${y}`;
 
-      for (let y = 0; y < SIZE; y++) {
-        const row = document.createElement('tr');
-        
-        const houseCell = document.createElement('td');
-        houseCell.classList.add('house-cell');
-        if (y === Math.floor(SIZE / 2)) {
-          houseCell.textContent = '🏚️';
-        }
-        row.appendChild(houseCell);
-        
-        for (let x = 0; x < SIZE; x++) {
-          const cell = document.createElement('td');
-          const key = `${x},${y}`;
-          cells[key] = cell;
-          
-          if (rocks.has(key)) {
-            cell.classList.add('rock');
-            cell.textContent = '🌲';
-          } else if (x === exitPos.x && y === exitPos.y) {
-            cell.classList.add('exit');
-            cell.textContent = '🏫';
-          } else {
-            // Ajouter la classe ice-tile pour les cellules vides
-            cell.classList.add('ice-tile');
-          }
-          
-          row.appendChild(cell);
-        }
-        grid.appendChild(row);
-      }
+                if ((x === playerPos.x && y === playerPos.y) ||
+                    (x === exitPos.x && y === exitPos.y)) {
+                    continue;
+                }
 
-      createPlayer();
+                rocks.add(key);
+            }
+            attempts++;
+        } while (!canReachExit() && attempts < 100);
+
+        if (attempts >= 100) {
+            rocks.clear();
+            let reducedCount = Math.floor(ROCK_COUNT * 0.7);
+            while (rocks.size < reducedCount) {
+                const x = Math.floor(Math.random() * SIZE);
+                const y = Math.floor(Math.random() * SIZE);
+                const key = `${x},${y}`;
+
+                if ((x === playerPos.x && y === playerPos.y) ||
+                    (x === exitPos.x && y === exitPos.y)) {
+                    continue;
+                }
+
+                rocks.add(key);
+            }
+        }
+
+        // Recalculer les tailles avant de créer la grille
+        calculateCellSize();
+
+        for (let y = 0; y < SIZE; y++) {
+            const row = document.createElement('tr');
+
+            const houseCell = document.createElement('td');
+            houseCell.classList.add('house-cell');
+            if (y === Math.floor(SIZE / 2)) {
+                houseCell.textContent = '🏚️';
+            }
+            row.appendChild(houseCell);
+
+            for (let x = 0; x < SIZE; x++) {
+                const cell = document.createElement('td');
+                const key = `${x},${y}`;
+                cells[key] = cell;
+
+                if (rocks.has(key)) {
+                    cell.classList.add('rock');
+                    cell.textContent = '🌲';
+                } else if (x === exitPos.x && y === exitPos.y) {
+                    cell.classList.add('exit');
+                    cell.textContent = '🏫';
+                } else {
+                    // Ajouter la classe ice-tile pour les cellules vides
+                    cell.classList.add('ice-tile');
+                }
+
+                row.appendChild(cell);
+            }
+            grid.appendChild(row);
+        }
+
+        createPlayer();
     }
 
     function createPlayer() {
-      if (playerElement) {
-        playerElement.remove();
-      }
+        if (playerElement) {
+            playerElement.remove();
+        }
 
-      const cellKey = `${playerPos.x},${playerPos.y}`;
-      const cell = cells[cellKey];
-      
-      playerElement = document.createElement('div');
-      playerElement.className = 'player';
-      playerElement.textContent = '🧑‍💼';
-      
-      cell.appendChild(playerElement);
+        const cellKey = `${playerPos.x},${playerPos.y}`;
+        const cell = cells[cellKey];
+
+        playerElement = document.createElement('div');
+        playerElement.className = 'player';
+        playerElement.textContent = '🧑‍💼';
+
+        cell.appendChild(playerElement);
     }
 
     function movePlayerTo(x, y, isSolution = false) {
-      const cellKey = `${x},${y}`;
-      const targetCell = cells[cellKey];
-      
-      if (targetCell) {
-        isMoving = true;
-        const currentCell = cells[`${playerPos.x},${playerPos.y}`];
-        const currentRect = currentCell.getBoundingClientRect();
-        const targetRect = targetCell.getBoundingClientRect();
-        
-        const deltaX = targetRect.left - currentRect.left;
-        const deltaY = targetRect.top - currentRect.top;
-        
-        playerElement.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-        
-        setTimeout(() => {
-          playerPos.x = x;
-          playerPos.y = y;
-          playerElement.style.transform = '';
-          targetCell.appendChild(playerElement);
-          isMoving = false;
-          
-          // Si un mouvement est en buffer, l'exécuter
-          if (bufferedMove) {
-            const {dx, dy} = bufferedMove;
-            bufferedMove = null;
-            movePlayer(dx, dy);
-          }
-          
-          // Ne déclencher la victoire que si ce n'est pas la solution
-          if (!isSolution && playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
-            showVictory();
-          }
-        }, 250);
-      }
+        const cellKey = `${x},${y}`;
+        const targetCell = cells[cellKey];
+
+        if (targetCell) {
+            isMoving = true;
+            const currentCell = cells[`${playerPos.x},${playerPos.y}`];
+            const currentRect = currentCell.getBoundingClientRect();
+            const targetRect = targetCell.getBoundingClientRect();
+
+            const deltaX = targetRect.left - currentRect.left;
+            const deltaY = targetRect.top - currentRect.top;
+
+            playerElement.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+            setTimeout(() => {
+                playerPos.x = x;
+                playerPos.y = y;
+                playerElement.style.transform = '';
+                targetCell.appendChild(playerElement);
+                isMoving = false;
+
+                // Si un mouvement est en buffer, l'exécuter
+                if (bufferedMove) {
+                    const {dx, dy} = bufferedMove;
+                    bufferedMove = null;
+                    movePlayer(dx, dy);
+                }
+
+                // Ne déclencher la victoire que si ce n'est pas la solution
+                if (!isSolution && playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
+                    showVictory();
+                }
+            }, 250);
+        }
     }
 
     function isRock(x, y) {
-      return rocks.has(`${x},${y}`);
+        return rocks.has(`${x},${y}`);
     }
 
     function isValidPosition(x, y) {
-      return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
+        return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
     }
 
     function movePlayer(dx, dy) {
-      // Si une animation est en cours, buffer le mouvement
-      if (isMoving) {
-        bufferedMove = {dx, dy};
-        return;
-      }
-      
-      let newX = playerPos.x;
-      let newY = playerPos.y;
-
-      while (true) {
-        const nextX = newX + dx;
-        const nextY = newY + dy;
-
-        if (!isValidPosition(nextX, nextY)) {
-          break;
+        // Si une animation est en cours, buffer le mouvement
+        if (isMoving) {
+            bufferedMove = {dx, dy};
+            return;
         }
 
-        if (isRock(nextX, nextY)) {
-          break;
-        }
+        let newX = playerPos.x;
+        let newY = playerPos.y;
 
-        newX = nextX;
-        newY = nextY;
-        
-        // Si on atteint l'école, s'arrêter immédiatement
-        if (newX === exitPos.x && newY === exitPos.y) {
-          break;
-        }
-      }
+        while (true) {
+            const nextX = newX + dx;
+            const nextY = newY + dy;
 
-      if (newX !== playerPos.x || newY !== playerPos.y) {
-        moves++;
-        document.getElementById('moves').textContent = moves;
-        movePlayerTo(newX, newY);
-      }
-    }
+            if (!isValidPosition(nextX, nextY)) {
+                break;
+            }
 
-    function showVictory() {
-      document.getElementById('finalMoves').textContent = moves;
-      document.getElementById('finalDifficulty').textContent = LEVELS[currentLevel].name;
-      document.getElementById('victoryMessage').style.display = 'block';
-      
-      // Mettre le focus sur "Recommencer" par défaut
-      setTimeout(() => {
-        document.getElementById('btnRestart').focus();
-      }, 100);
-    }
-
-    function findPath() {
-      const visited = new Set();
-      const parent = new Map();
-      const queue = [{x: playerPos.x, y: playerPos.y}];
-      visited.add(`${playerPos.x},${playerPos.y}`);
-
-      const directions = [
-        {dx: 0, dy: -1},
-        {dx: 0, dy: 1},
-        {dx: -1, dy: 0},
-        {dx: 1, dy: 0}
-      ];
-
-      while (queue.length > 0) {
-        const current = queue.shift();
-
-        if (current.x === exitPos.x && current.y === exitPos.y) {
-          // Reconstruire le chemin
-          const path = [];
-          let pos = current;
-          while (parent.has(`${pos.x},${pos.y}`)) {
-            path.unshift(pos);
-            pos = parent.get(`${pos.x},${pos.y}`);
-          }
-          path.unshift({x: playerPos.x, y: playerPos.y});
-          return path;
-        }
-
-        for (const dir of directions) {
-          let newX = current.x;
-          let newY = current.y;
-          let lastValid = {x: current.x, y: current.y};
-
-          while (true) {
-            const nextX = newX + dir.dx;
-            const nextY = newY + dir.dy;
-
-            if (!isValidPosition(nextX, nextY) || isRock(nextX, nextY)) {
-              break;
+            if (isRock(nextX, nextY)) {
+                break;
             }
 
             newX = nextX;
             newY = nextY;
-            lastValid = {x: newX, y: newY};
-          }
 
-          const key = `${lastValid.x},${lastValid.y}`;
-          if (!visited.has(key)) {
-            visited.add(key);
-            queue.push(lastValid);
-            parent.set(key, current);
-          }
+            // Si on atteint l'école, s'arrêter immédiatement
+            if (newX === exitPos.x && newY === exitPos.y) {
+                break;
+            }
         }
-      }
 
-      return null;
+        if (newX !== playerPos.x || newY !== playerPos.y) {
+            moves++;
+            document.getElementById('moves').textContent = moves;
+            movePlayerTo(newX, newY);
+        }
+    }
+
+    function showVictory() {
+        document.getElementById('finalMoves').textContent = moves;
+        document.getElementById('finalDifficulty').textContent = LEVELS[currentLevel].name;
+        document.getElementById('victoryMessage').style.display = 'block';
+
+        // Mettre le focus sur "Recommencer" par défaut
+        setTimeout(() => {
+            document.getElementById('btnRestart').focus();
+        }, 100);
+    }
+
+    function findPath() {
+        const visited = new Set();
+        const parent = new Map();
+        const queue = [{x: playerPos.x, y: playerPos.y}];
+        visited.add(`${playerPos.x},${playerPos.y}`);
+
+        const directions = [
+            {dx: 0, dy: -1},
+            {dx: 0, dy: 1},
+            {dx: -1, dy: 0},
+            {dx: 1, dy: 0}
+        ];
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+
+            if (current.x === exitPos.x && current.y === exitPos.y) {
+                // Reconstruire le chemin
+                const path = [];
+                let pos = current;
+                while (parent.has(`${pos.x},${pos.y}`)) {
+                    path.unshift(pos);
+                    pos = parent.get(`${pos.x},${pos.y}`);
+                }
+                path.unshift({x: playerPos.x, y: playerPos.y});
+                return path;
+            }
+
+            for (const dir of directions) {
+                let newX = current.x;
+                let newY = current.y;
+                let lastValid = {x: current.x, y: current.y};
+
+                while (true) {
+                    const nextX = newX + dir.dx;
+                    const nextY = newY + dir.dy;
+
+                    if (!isValidPosition(nextX, nextY) || isRock(nextX, nextY)) {
+                        break;
+                    }
+
+                    newX = nextX;
+                    newY = nextY;
+                    lastValid = {x: newX, y: newY};
+                }
+
+                const key = `${lastValid.x},${lastValid.y}`;
+                if (!visited.has(key)) {
+                    visited.add(key);
+                    queue.push(lastValid);
+                    parent.set(key, current);
+                }
+            }
+        }
+
+        return null;
     }
 
     let isShowingSolution = false;
     let solutionInterval = null;
 
     function showSolution() {
-      if (isShowingSolution) return;
-      isShowingSolution = true;
+        if (isShowingSolution) return;
+        isShowingSolution = true;
 
-      // Désactiver les contrôles pendant l'animation
-      document.removeEventListener('keydown', keydownHandler);
+        // Désactiver les contrôles pendant l'animation
+        document.removeEventListener('keydown', keydownHandler);
 
-      // Trouver le chemin
-      const path = findPath();
-      if (!path) {
-        alert("Pas de solution trouvée !");
-        return;
-      }
-
-      // Sauvegarder la position originale du joueur
-      const originalPos = {...playerPos};
-      const originalElement = playerElement;
-
-      // Créer un nouveau joueur pour la solution
-      playerElement = document.createElement('div');
-      playerElement.className = 'player solution-player';
-      playerElement.textContent = '🦸';
-
-      let currentIndex = 0;
-      const visitedCells = new Set();
-
-      // Animer le chemin
-      solutionInterval = setInterval(() => {
-        if (currentIndex >= path.length) {
-          clearInterval(solutionInterval);
-
-          // Restaurer le joueur original après un délai
-          setTimeout(() => {
-            // Nettoyer les classes solution-path et restaurer les sprites
-            for (const key of visitedCells) {
-              const cell = cells[key];
-              cell.classList.remove('solution-path');
-              if (!cell.classList.contains('rock') && !cell.classList.contains('exit')) {
-                cell.textContent = '';
-              }
-            }
-
-            // Restaurer le joueur original
-            playerElement = originalElement;
-            playerPos = originalPos;
-            createPlayer();
-
-            // Réactiver les contrôles
-            document.addEventListener('keydown', keydownHandler);
-            isShowingSolution = false;
-          }, 1500);
-
-          return;
+        // Trouver le chemin
+        const path = findPath();
+        if (!path) {
+            alert("Pas de solution trouvée !");
+            return;
         }
 
-        const pos = path[currentIndex];
-        // Calculer toutes les cases parcourues pour atteindre cette position
-        if (currentIndex > 0) {
-          const prevPos = path[currentIndex - 1];
-          const dx = Math.sign(pos.x - prevPos.x);
-          const dy = Math.sign(pos.y - prevPos.y);
-          let x = prevPos.x;
-          let y = prevPos.y;
+        // Sauvegarder la position originale du joueur
+        const originalPos = {...playerPos};
+        const originalElement = playerElement;
 
-          // Marquer toutes les cases intermédiaires
-          while (x !== pos.x || y !== pos.y) {
-            const key = `${x},${y}`;
+        // Créer un nouveau joueur pour la solution
+        playerElement = document.createElement('div');
+        playerElement.className = 'player solution-player';
+        playerElement.textContent = '🦸';
+
+        let currentIndex = 0;
+        const visitedCells = new Set();
+
+        // Animer le chemin
+        solutionInterval = setInterval(() => {
+            if (currentIndex >= path.length) {
+                clearInterval(solutionInterval);
+
+                // Restaurer le joueur original après un délai
+                setTimeout(() => {
+                    // Nettoyer les classes solution-path et restaurer les sprites
+                    for (const key of visitedCells) {
+                        const cell = cells[key];
+                        cell.classList.remove('solution-path');
+                        if (!cell.classList.contains('rock') && !cell.classList.contains('exit')) {
+                            cell.textContent = '';
+                        }
+                    }
+
+                    // Restaurer le joueur original
+                    playerElement = originalElement;
+                    playerPos = originalPos;
+                    createPlayer();
+
+                    // Réactiver les contrôles
+                    document.addEventListener('keydown', keydownHandler);
+                    isShowingSolution = false;
+                }, 1500);
+
+                return;
+            }
+
+            const pos = path[currentIndex];
+            // Calculer toutes les cases parcourues pour atteindre cette position
+            if (currentIndex > 0) {
+                const prevPos = path[currentIndex - 1];
+                const dx = Math.sign(pos.x - prevPos.x);
+                const dy = Math.sign(pos.y - prevPos.y);
+                let x = prevPos.x;
+                let y = prevPos.y;
+
+                // Marquer toutes les cases intermédiaires
+                while (x !== pos.x || y !== pos.y) {
+                    const key = `${x},${y}`;
+                    if (!visitedCells.has(key)) {
+                        visitedCells.add(key);
+                        const cell = cells[key];
+                        if (!cell.classList.contains('exit')) {
+                            cell.classList.add('solution-path');
+                            cell.textContent = '✨';
+                        }
+                    }
+                    x += dx;
+                    y += dy;
+                }
+            }
+
+            // Marquer la position actuelle
+            const key = `${pos.x},${pos.y}`;
             if (!visitedCells.has(key)) {
-              visitedCells.add(key);
-              const cell = cells[key];
-              if (!cell.classList.contains('exit')) {
-                cell.classList.add('solution-path');
-                cell.textContent = '✨';
-              }
+                visitedCells.add(key);
+                const cell = cells[key];
+                if (!cell.classList.contains('exit')) {
+                    cell.classList.add('solution-path');
+                    cell.textContent = '✨';
+                }
             }
-            x += dx;
-            y += dy;
-          }
-        }
 
-        // Marquer la position actuelle
-        const key = `${pos.x},${pos.y}`;
-        if (!visitedCells.has(key)) {
-          visitedCells.add(key);
-          const cell = cells[key];
-          if (!cell.classList.contains('exit')) {
-            cell.classList.add('solution-path');
-            cell.textContent = '✨';
-          }
-        }
-
-        // Déplacer le joueur solution
-        movePlayerTo(pos.x, pos.y, true);
-        currentIndex++;
-      }, 500);
+            // Déplacer le joueur solution
+            movePlayerTo(pos.x, pos.y, true);
+            currentIndex++;
+        }, 500);
     }
 
     // Séparer le gestionnaire d'événements keydown dans une fonction nommée
     function keydownHandler(e) {
-      const victoryMsg = document.getElementById('victoryMessage');
-      
-      if (victoryMsg.style.display === 'block') {
-        const btnNext = document.getElementById('btnNextLevel');
-        const btnRestart = document.getElementById('btnRestart');
-        const focused = document.activeElement;
-        
-        if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          if (focused === btnRestart) {
-            btnNext.focus();
-          }
-        } else if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          if (focused === btnNext) {
-            btnRestart.focus();
-          }
-        } else if (e.key === 'Enter') {
-          e.preventDefault();
-          if (focused === btnNext) {
-            nextLevel();
-          } else if (focused === btnRestart) {
-            regenerateLevel();
-            victoryMsg.style.display = 'none';
-          }
-        }
-        return;
-      }
+        const victoryMsg = document.getElementById('victoryMessage');
 
-      switch(e.key) {
-        case 'ArrowUp':
-          e.preventDefault();
-          movePlayer(0, -1);
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          movePlayer(0, 1);
-          break;
-        case 'ArrowLeft':
-          e.preventDefault();
-          movePlayer(-1, 0);
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          movePlayer(1, 0);
-          break;
-      }
+        if (victoryMsg.style.display === 'block') {
+            const btnNext = document.getElementById('btnNextLevel');
+            const btnRestart = document.getElementById('btnRestart');
+            const focused = document.activeElement;
+
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (focused === btnRestart) {
+                    btnNext.focus();
+                }
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (focused === btnNext) {
+                    btnRestart.focus();
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (focused === btnNext) {
+                    nextLevel();
+                } else if (focused === btnRestart) {
+                    regenerateLevel();
+                    victoryMsg.style.display = 'none';
+                }
+            }
+            return;
+        }
+
+        switch(e.key) {
+            case 'ArrowUp':
+                e.preventDefault();
+                movePlayer(0, -1);
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                movePlayer(0, 1);
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                movePlayer(-1, 0);
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                movePlayer(1, 0);
+                break;
+        }
     }
 
     // Remplacer l'ancien écouteur d'événements par la nouvelle fonction nommée
@@ -869,12 +909,12 @@
     // Nettoyer la solution lors de la régénération du niveau
     const originalRegenerateLevel = regenerateLevel;
     regenerateLevel = function() {
-      if (solutionInterval) {
-        clearInterval(solutionInterval);
-        solutionInterval = null;
-      }
-      isShowingSolution = false;
-      originalRegenerateLevel();
+        if (solutionInterval) {
+            clearInterval(solutionInterval);
+            solutionInterval = null;
+        }
+        isShowingSolution = false;
+        originalRegenerateLevel();
     };
 
     // Variables pour la gestion du touch
@@ -883,51 +923,51 @@
     const SWIPE_THRESHOLD = 50;
 
     function handleTouchStart(e) {
-      if (!e.target.closest('#gameContainer')) return;
+        if (!e.target.closest('#gameContainer')) return;
 
-      const touch = e.touches[0];
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
     }
 
     function handleTouchMove(e) {
-      if (!e.target.closest('#gameContainer') || !touchStartX || !touchStartY) {
-        return;
-      }
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      const touch = e.touches[0];
-      const deltaX = touch.clientX - touchStartX;
-      const deltaY = touch.clientY - touchStartY;
-      const absX = Math.abs(deltaX);
-      const absY = Math.abs(deltaY);
-
-      if (Math.max(absX, absY) > SWIPE_THRESHOLD) {
-        if (absX > absY) {
-          // Swipe horizontal
-          if (deltaX > 0) {
-            movePlayer(1, 0); // Droite
-          } else {
-            movePlayer(-1, 0); // Gauche
-          }
-        } else {
-          // Swipe vertical
-          if (deltaY > 0) {
-            movePlayer(0, 1); // Bas
-          } else {
-            movePlayer(0, -1); // Haut
-          }
+        if (!e.target.closest('#gameContainer') || !touchStartX || !touchStartY) {
+            return;
         }
-        touchStartX = 0;
-        touchStartY = 0;
-      }
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+
+        if (Math.max(absX, absY) > SWIPE_THRESHOLD) {
+            if (absX > absY) {
+                // Swipe horizontal
+                if (deltaX > 0) {
+                    movePlayer(1, 0); // Droite
+                } else {
+                    movePlayer(-1, 0); // Gauche
+                }
+            } else {
+                // Swipe vertical
+                if (deltaY > 0) {
+                    movePlayer(0, 1); // Bas
+                } else {
+                    movePlayer(0, -1); // Haut
+                }
+            }
+            touchStartX = 0;
+            touchStartY = 0;
+        }
     }
 
     function handleTouchEnd() {
-      touchStartX = 0;
-      touchStartY = 0;
+        touchStartX = 0;
+        touchStartY = 0;
     }
 
     // Supprimer les anciens écouteurs d'événements s'ils existent
@@ -943,11 +983,11 @@
 
     // Gérer le redimensionnement de la fenêtre
     window.addEventListener('resize', () => {
-      calculateCellSize();
+        calculateCellSize();
     });
 
     calculateCellSize();
     initGame();
-  </script>
+</script>
 </body>
 </html>
