@@ -214,6 +214,58 @@
     .easy { background: #90EE90; color: #2d5016; }
     .medium { background: #FFD700; color: #665200; }
     .hard { background: #FF6B6B; color: #660000; }
+
+    .solution-path {
+      background: rgba(144, 238, 144, 0.6) !important;
+      transition: all 0.5s ease;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .game-button {
+      padding: 12px 25px;
+      font-size: 16px;
+      background: white;
+      color: #667eea;
+      border: 2px solid white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+      flex: 1;
+      min-width: 180px;
+      max-width: 200px;
+    }
+
+    .game-button:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .game-button.solution {
+      background: #ff4444;
+      color: white;
+      border-color: #ff4444;
+    }
+
+    .game-button.solution:hover {
+      background: white;
+      color: #ff4444;
+    }
+
+    .solution-player {
+      color: gold;
+      text-shadow: 0 0 5px rgba(0,0,0,0.5);
+      transition: transform 500ms ease;
+    }
   </style>
 </head>
 <body>
@@ -240,9 +292,14 @@
   <div class="controls">
     <p>🎮 Utilisez les flèches du clavier pour vous déplacer</p>
     <p>⚠️ Attention : vous glissez sur la glace jusqu'au prochain obstacle !</p>
-    <button onclick="regenerateLevel()" style="margin-top: 15px; padding: 12px 25px; font-size: 16px; background: white; color: #667eea; border: 2px solid white; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s;" onmouseover="this.style.background='#667eea'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#667eea';">
-      🔄 Nouvelle grille
-    </button>
+    <div class="button-container">
+      <button class="game-button" onclick="regenerateLevel()">
+        🔄 Nouvelle grille
+      </button>
+      <button class="game-button solution" onclick="showSolution()">
+        🦸 Solution
+      </button>
+    </div>
   </div>
 
   <div id="victoryMessage">
@@ -482,7 +539,7 @@
       cell.appendChild(playerElement);
     }
 
-    function movePlayerTo(x, y) {
+    function movePlayerTo(x, y, isSolution = false) {
       const cellKey = `${x},${y}`;
       const targetCell = cells[cellKey];
       
@@ -511,7 +568,8 @@
             movePlayer(dx, dy);
           }
           
-          if (playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
+          // Ne déclencher la victoire que si ce n'est pas la solution
+          if (!isSolution && playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
             showVictory();
           }
         }, 250);
@@ -575,10 +633,168 @@
       }, 100);
     }
 
-    document.addEventListener('keydown', (e) => {
+    function findPath() {
+      const visited = new Set();
+      const parent = new Map();
+      const queue = [{x: playerPos.x, y: playerPos.y}];
+      visited.add(`${playerPos.x},${playerPos.y}`);
+
+      const directions = [
+        {dx: 0, dy: -1},
+        {dx: 0, dy: 1},
+        {dx: -1, dy: 0},
+        {dx: 1, dy: 0}
+      ];
+
+      while (queue.length > 0) {
+        const current = queue.shift();
+
+        if (current.x === exitPos.x && current.y === exitPos.y) {
+          // Reconstruire le chemin
+          const path = [];
+          let pos = current;
+          while (parent.has(`${pos.x},${pos.y}`)) {
+            path.unshift(pos);
+            pos = parent.get(`${pos.x},${pos.y}`);
+          }
+          path.unshift({x: playerPos.x, y: playerPos.y});
+          return path;
+        }
+
+        for (const dir of directions) {
+          let newX = current.x;
+          let newY = current.y;
+          let lastValid = {x: current.x, y: current.y};
+
+          while (true) {
+            const nextX = newX + dir.dx;
+            const nextY = newY + dir.dy;
+
+            if (!isValidPosition(nextX, nextY) || isRock(nextX, nextY)) {
+              break;
+            }
+
+            newX = nextX;
+            newY = nextY;
+            lastValid = {x: newX, y: newY};
+          }
+
+          const key = `${lastValid.x},${lastValid.y}`;
+          if (!visited.has(key)) {
+            visited.add(key);
+            queue.push(lastValid);
+            parent.set(key, current);
+          }
+        }
+      }
+
+      return null;
+    }
+
+    let isShowingSolution = false;
+    let solutionInterval = null;
+
+    function showSolution() {
+      if (isShowingSolution) return;
+      isShowingSolution = true;
+
+      // Désactiver les contrôles pendant l'animation
+      document.removeEventListener('keydown', keydownHandler);
+
+      // Trouver le chemin
+      const path = findPath();
+      if (!path) {
+        alert("Pas de solution trouvée !");
+        return;
+      }
+
+      // Sauvegarder la position originale du joueur
+      const originalPos = {...playerPos};
+      const originalElement = playerElement;
+
+      // Créer un nouveau joueur pour la solution
+      playerElement = document.createElement('div');
+      playerElement.className = 'player solution-player';
+      playerElement.textContent = '🦸';
+
+      let currentIndex = 0;
+      const visitedCells = new Set();
+
+      // Animer le chemin
+      solutionInterval = setInterval(() => {
+        if (currentIndex >= path.length) {
+          clearInterval(solutionInterval);
+
+          // Restaurer le joueur original après un délai
+          setTimeout(() => {
+            // Nettoyer les classes solution-path et restaurer les sprites
+            for (const key of visitedCells) {
+              const cell = cells[key];
+              cell.classList.remove('solution-path');
+              if (!cell.classList.contains('rock') && !cell.classList.contains('exit')) {
+                cell.textContent = '';
+              }
+            }
+
+            // Restaurer le joueur original
+            playerElement = originalElement;
+            playerPos = originalPos;
+            createPlayer();
+
+            // Réactiver les contrôles
+            document.addEventListener('keydown', keydownHandler);
+            isShowingSolution = false;
+          }, 1500);
+
+          return;
+        }
+
+        const pos = path[currentIndex];
+        // Calculer toutes les cases parcourues pour atteindre cette position
+        if (currentIndex > 0) {
+          const prevPos = path[currentIndex - 1];
+          const dx = Math.sign(pos.x - prevPos.x);
+          const dy = Math.sign(pos.y - prevPos.y);
+          let x = prevPos.x;
+          let y = prevPos.y;
+
+          // Marquer toutes les cases intermédiaires
+          while (x !== pos.x || y !== pos.y) {
+            const key = `${x},${y}`;
+            if (!visitedCells.has(key)) {
+              visitedCells.add(key);
+              const cell = cells[key];
+              if (!cell.classList.contains('exit')) {
+                cell.classList.add('solution-path');
+                cell.textContent = '✨';
+              }
+            }
+            x += dx;
+            y += dy;
+          }
+        }
+
+        // Marquer la position actuelle
+        const key = `${pos.x},${pos.y}`;
+        if (!visitedCells.has(key)) {
+          visitedCells.add(key);
+          const cell = cells[key];
+          if (!cell.classList.contains('exit')) {
+            cell.classList.add('solution-path');
+            cell.textContent = '✨';
+          }
+        }
+
+        // Déplacer le joueur solution
+        movePlayerTo(pos.x, pos.y, true);
+        currentIndex++;
+      }, 500);
+    }
+
+    // Séparer le gestionnaire d'événements keydown dans une fonction nommée
+    function keydownHandler(e) {
       const victoryMsg = document.getElementById('victoryMessage');
       
-      // Si la popup de victoire est affichée
       if (victoryMsg.style.display === 'block') {
         const btnNext = document.getElementById('btnNextLevel');
         const btnRestart = document.getElementById('btnRestart');
@@ -624,12 +840,81 @@
           movePlayer(1, 0);
           break;
       }
-    });
+    }
+
+    // Remplacer l'ancien écouteur d'événements par la nouvelle fonction nommée
+    document.addEventListener('keydown', keydownHandler);
+
+    // Nettoyer la solution lors de la régénération du niveau
+    const originalRegenerateLevel = regenerateLevel;
+    regenerateLevel = function() {
+      if (solutionInterval) {
+        clearInterval(solutionInterval);
+        solutionInterval = null;
+      }
+      isShowingSolution = false;
+      originalRegenerateLevel();
+    };
 
     // Gérer le redimensionnement de la fenêtre
     window.addEventListener('resize', () => {
       calculateCellSize();
     });
+
+    // Variables pour la gestion du touch
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const SWIPE_THRESHOLD = 50; // Distance minimale pour un swipe en pixels
+
+    function handleTouchStart(e) {
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }
+
+    function handleTouchMove(e) {
+      if (!touchStartX || !touchStartY) return;
+
+      e.preventDefault(); // Empêcher le défilement de la page
+
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      // Ne déclencher que si le swipe est assez long
+      if (Math.max(absX, absY) > SWIPE_THRESHOLD) {
+        if (absX > absY) {
+          // Swipe horizontal
+          if (deltaX > 0) {
+            movePlayer(1, 0); // Droite
+          } else {
+            movePlayer(-1, 0); // Gauche
+          }
+        } else {
+          // Swipe vertical
+          if (deltaY > 0) {
+            movePlayer(0, 1); // Bas
+          } else {
+            movePlayer(0, -1); // Haut
+          }
+        }
+        // Réinitialiser pour éviter les mouvements multiples
+        touchStartX = 0;
+        touchStartY = 0;
+      }
+    }
+
+    function handleTouchEnd() {
+      touchStartX = 0;
+      touchStartY = 0;
+    }
+
+    // Ajouter les écouteurs d'événements tactiles
+    document.addEventListener('touchstart', handleTouchStart, false);
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, false);
 
     calculateCellSize();
     initGame();
