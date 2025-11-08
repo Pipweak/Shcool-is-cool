@@ -7,21 +7,49 @@
   <style>
     body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      height: 100vh;
+      width: 100vw;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       font-family: Arial, sans-serif;
-      overflow-x: hidden;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     h1 {
       color: white;
-      margin-bottom: 10px;
+      margin: 10px 0;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      font-size: clamp(24px, 4vw, 32px);
+    }
+
+    .game-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+      height: 100%;
+      max-height: 100vh;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #gameContainer {
+      position: relative;
+      display: inline-block;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      max-width: 95vw;
+      max-height: calc(70vh - 20px);
+      overflow: hidden;
     }
 
     .level-selector {
@@ -62,16 +90,6 @@
       text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     }
 
-    #gameContainer {
-      position: relative;
-      display: inline-block;
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      max-width: 95vw;
-      max-height: 70vh;
-    }
 
     #grid {
       border-collapse: collapse;
@@ -269,46 +287,48 @@
   </style>
 </head>
 <body>
-  <h1>🧑‍💼 School is Cool 🏫</h1>
-  
-  <div class="level-selector">
-    <label for="levelSelect">Niveau :</label>
-    <select id="levelSelect" onchange="changeLevel()">
-      <option value="1">Niveau 1 - Facile (10×10)</option>
-      <option value="2">Niveau 2 - Moyen (15×15)</option>
-      <option value="3">Niveau 3 - Difficile (20×20)</option>
-    </select>
-  </div>
+  <div class="game-wrapper">
+    <h1>🧑‍💼 School is Cool 🏫</h1>
 
-  <div class="info">
-    Déplacements: <span id="moves">0</span>
-    <span id="difficultyBadge" class="difficulty-badge easy">FACILE</span>
-  </div>
-
-  <div id="gameContainer">
-    <table id="grid"></table>
-  </div>
-
-  <div class="controls">
-    <p>🎮 Utilisez les flèches du clavier pour vous déplacer</p>
-    <p>⚠️ Attention : vous glissez sur la glace jusqu'au prochain obstacle !</p>
-    <div class="button-container">
-      <button class="game-button" onclick="regenerateLevel()">
-        🔄 Nouvelle grille
-      </button>
-      <button class="game-button solution" onclick="showSolution()">
-        🦸 Solution
-      </button>
+    <div class="level-selector">
+      <label for="levelSelect">Niveau :</label>
+      <select id="levelSelect" onchange="changeLevel()">
+        <option value="1">Niveau 1 - Facile (10×10)</option>
+        <option value="2">Niveau 2 - Moyen (15×15)</option>
+        <option value="3">Niveau 3 - Difficile (20×20)</option>
+      </select>
     </div>
-  </div>
 
-  <div id="victoryMessage">
-    <h2>🎉 Bravo ! Vous avez atteint l'école ! 🎉</h2>
-    <p>Nombre de déplacements : <span id="finalMoves"></span></p>
-    <p>Difficulté : <span id="finalDifficulty"></span></p>
-    <div style="display: flex; gap: 10px; justify-content: center;">
-      <button id="btnNextLevel" onclick="nextLevel()">Niveau suivant</button>
-      <button id="btnRestart" onclick="regenerateLevel(); document.getElementById('victoryMessage').style.display = 'none';">Recommencer</button>
+    <div class="info">
+      Déplacements: <span id="moves">0</span>
+      <span id="difficultyBadge" class="difficulty-badge easy">FACILE</span>
+    </div>
+
+    <div id="gameContainer">
+      <table id="grid"></table>
+    </div>
+
+    <div class="controls">
+      <p>🎮 Utilisez les flèches du clavier pour vous déplacer</p>
+      <p>⚠️ Attention : vous glissez sur la glace jusqu'au prochain obstacle !</p>
+      <div class="button-container">
+        <button class="game-button" onclick="regenerateLevel()">
+          🔄 Nouvelle grille
+        </button>
+        <button class="game-button solution" onclick="showSolution()">
+          🦸 Solution
+        </button>
+      </div>
+    </div>
+
+    <div id="victoryMessage">
+      <h2>🎉 Bravo ! Vous avez atteint l'école ! 🎉</h2>
+      <p>Nombre de déplacements : <span id="finalMoves"></span></p>
+      <p>Difficulté : <span id="finalDifficulty"></span></p>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button id="btnNextLevel" onclick="nextLevel()">Niveau suivant</button>
+        <button id="btnRestart" onclick="regenerateLevel(); document.getElementById('victoryMessage').style.display = 'none';">Recommencer</button>
+      </div>
     </div>
   </div>
 
@@ -856,26 +876,26 @@
       originalRegenerateLevel();
     };
 
-    // Gérer le redimensionnement de la fenêtre
-    window.addEventListener('resize', () => {
-      calculateCellSize();
-    });
-
     // Variables pour la gestion du touch
     let touchStartX = 0;
     let touchStartY = 0;
-    const SWIPE_THRESHOLD = 50; // Distance minimale pour un swipe en pixels
+    const SWIPE_THRESHOLD = 50;
 
     function handleTouchStart(e) {
+      // Vérifier si le touch est sur la grille de jeu
+      if (!e.target.closest('#gameContainer')) return;
+
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
     }
 
     function handleTouchMove(e) {
+      // Vérifier si le touch est sur la grille de jeu
+      if (!e.target.closest('#gameContainer')) return;
       if (!touchStartX || !touchStartY) return;
 
-      e.preventDefault(); // Empêcher le défilement de la page
+      e.preventDefault(); // Empêcher le défilement uniquement si on est sur la grille
 
       const touch = e.touches[0];
       const deltaX = touch.clientX - touchStartX;
@@ -883,38 +903,37 @@
       const absX = Math.abs(deltaX);
       const absY = Math.abs(deltaY);
 
-      // Ne déclencher que si le swipe est assez long
       if (Math.max(absX, absY) > SWIPE_THRESHOLD) {
         if (absX > absY) {
-          // Swipe horizontal
           if (deltaX > 0) {
-            movePlayer(1, 0); // Droite
+            movePlayer(1, 0);
           } else {
-            movePlayer(-1, 0); // Gauche
+            movePlayer(-1, 0);
           }
         } else {
-          // Swipe vertical
           if (deltaY > 0) {
-            movePlayer(0, 1); // Bas
+            movePlayer(0, 1);
           } else {
-            movePlayer(0, -1); // Haut
+            movePlayer(0, -1);
           }
         }
-        // Réinitialiser pour éviter les mouvements multiples
         touchStartX = 0;
         touchStartY = 0;
       }
     }
 
-    function handleTouchEnd() {
-      touchStartX = 0;
-      touchStartY = 0;
+    function handleTouchEnd(e) {
+      // Réinitialiser uniquement si on était sur la grille
+      if (e.target.closest('#gameContainer')) {
+        touchStartX = 0;
+        touchStartY = 0;
+      }
     }
 
-    // Ajouter les écouteurs d'événements tactiles
-    document.addEventListener('touchstart', handleTouchStart, false);
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd, false);
+    // Gérer le redimensionnement de la fenêtre
+    window.addEventListener('resize', () => {
+      calculateCellSize();
+    });
 
     calculateCellSize();
     initGame();
