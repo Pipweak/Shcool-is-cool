@@ -18,6 +18,7 @@
       font-family: Arial, sans-serif;
       box-sizing: border-box;
       overscroll-behavior-y: contain;
+      touch-action: pan-x pan-y;
     }
 
     h1 {
@@ -46,9 +47,11 @@
       padding: 10px;
       border-radius: 10px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      max-width: 95vw;
-      max-height: calc(70vh - 20px);
+      width: min(95vw, 600px);
+      height: auto;
+      aspect-ratio: 1/1;
       overflow: hidden;
+      touch-action: none;
     }
 
     .level-selector {
@@ -355,11 +358,10 @@
     let bufferedMove = null;
 
     function calculateCellSize() {
-      // Calculer la taille des cellules pour que la grille ait toujours la même taille
-      const gridWidth = Math.min(GRID_SIZE_PX, window.innerWidth * 0.9);
-      CELL_SIZE = Math.floor(gridWidth / (SIZE + 1)); // +1 pour la colonne de la maison
-      
-      // Appliquer la taille aux cellules
+      const container = document.getElementById('gameContainer');
+      const containerSize = container.clientWidth - 20; // 20px pour le padding
+      CELL_SIZE = Math.floor(containerSize / (SIZE + 1)); // +1 pour la colonne de la maison
+
       const style = document.createElement('style');
       style.id = 'dynamic-cell-size';
       const oldStyle = document.getElementById('dynamic-cell-size');
@@ -372,9 +374,9 @@
           height: ${CELL_SIZE}px; 
           font-size: ${fontSize}px;
         }
-        #gameContainer {
-          width: ${(SIZE + 1) * CELL_SIZE + 20}px;
-          height: ${SIZE * CELL_SIZE + 20}px;
+        #grid {
+          width: ${(SIZE + 1) * CELL_SIZE}px;
+          height: ${SIZE * CELL_SIZE}px;
         }
       `;
       document.head.appendChild(style);
@@ -881,7 +883,6 @@
     const SWIPE_THRESHOLD = 50;
 
     function handleTouchStart(e) {
-      // Vérifier si le touch est sur la grille de jeu
       if (!e.target.closest('#gameContainer')) return;
 
       const touch = e.touches[0];
@@ -890,10 +891,12 @@
     }
 
     function handleTouchMove(e) {
-      // Si on n'a pas commencé un swipe sur la grille, laisser le comportement par défaut
       if (!e.target.closest('#gameContainer') || !touchStartX || !touchStartY) {
         return;
       }
+
+      e.preventDefault();
+      e.stopPropagation();
 
       const touch = e.touches[0];
       const deltaX = touch.clientX - touchStartX;
@@ -901,26 +904,20 @@
       const absX = Math.abs(deltaX);
       const absY = Math.abs(deltaY);
 
-      // Si c'est un swipe vertical vers le bas au début de la page et qu'on n'est pas sur la grille,
-      // laisser le comportement par défaut pour permettre le refresh
-      if (window.scrollY === 0 && deltaY > 0 && !e.target.closest('#gameContainer')) {
-        return;
-      }
-
-      // Ne bloquer le défilement que pour les swipes de jeu
-      if (Math.max(absX, absY) > SWIPE_THRESHOLD && e.target.closest('#gameContainer')) {
-        e.preventDefault();
+      if (Math.max(absX, absY) > SWIPE_THRESHOLD) {
         if (absX > absY) {
+          // Swipe horizontal
           if (deltaX > 0) {
-            movePlayer(1, 0);
+            movePlayer(1, 0); // Droite
           } else {
-            movePlayer(-1, 0);
+            movePlayer(-1, 0); // Gauche
           }
         } else {
+          // Swipe vertical
           if (deltaY > 0) {
-            movePlayer(0, 1);
+            movePlayer(0, 1); // Bas
           } else {
-            movePlayer(0, -1);
+            movePlayer(0, -1); // Haut
           }
         }
         touchStartX = 0;
@@ -928,18 +925,21 @@
       }
     }
 
-    function handleTouchEnd(e) {
-      // Réinitialiser uniquement si on était sur la grille
-      if (e.target.closest('#gameContainer')) {
-        touchStartX = 0;
-        touchStartY = 0;
-      }
+    function handleTouchEnd() {
+      touchStartX = 0;
+      touchStartY = 0;
     }
 
-    // Ajouter les écouteurs d'événements tactiles avec la bonne configuration
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    // Supprimer les anciens écouteurs d'événements s'ils existent
+    document.removeEventListener('touchstart', handleTouchStart);
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+
+    // Ajouter les nouveaux écouteurs d'événements sur le gameContainer uniquement
+    const gameContainer = document.getElementById('gameContainer');
+    gameContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+    gameContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+    gameContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     // Gérer le redimensionnement de la fenêtre
     window.addEventListener('resize', () => {
