@@ -11,13 +11,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      justify-content: flex-start;
+      min-height: 100vh;
       width: 100vw;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       font-family: Arial, sans-serif;
-      overflow: hidden;
       box-sizing: border-box;
+      overscroll-behavior-y: contain;
     }
 
     h1 {
@@ -31,13 +31,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 10px;
       padding: 10px;
-      height: 100%;
-      max-height: 100vh;
       width: 100%;
       box-sizing: border-box;
+      min-height: 100vh;
     }
 
     #gameContainer {
@@ -891,11 +890,10 @@
     }
 
     function handleTouchMove(e) {
-      // Vérifier si le touch est sur la grille de jeu
-      if (!e.target.closest('#gameContainer')) return;
-      if (!touchStartX || !touchStartY) return;
-
-      e.preventDefault(); // Empêcher le défilement uniquement si on est sur la grille
+      // Si on n'a pas commencé un swipe sur la grille, laisser le comportement par défaut
+      if (!e.target.closest('#gameContainer') || !touchStartX || !touchStartY) {
+        return;
+      }
 
       const touch = e.touches[0];
       const deltaX = touch.clientX - touchStartX;
@@ -903,7 +901,15 @@
       const absX = Math.abs(deltaX);
       const absY = Math.abs(deltaY);
 
-      if (Math.max(absX, absY) > SWIPE_THRESHOLD) {
+      // Si c'est un swipe vertical vers le bas au début de la page et qu'on n'est pas sur la grille,
+      // laisser le comportement par défaut pour permettre le refresh
+      if (window.scrollY === 0 && deltaY > 0 && !e.target.closest('#gameContainer')) {
+        return;
+      }
+
+      // Ne bloquer le défilement que pour les swipes de jeu
+      if (Math.max(absX, absY) > SWIPE_THRESHOLD && e.target.closest('#gameContainer')) {
+        e.preventDefault();
         if (absX > absY) {
           if (deltaX > 0) {
             movePlayer(1, 0);
@@ -929,6 +935,11 @@
         touchStartY = 0;
       }
     }
+
+    // Ajouter les écouteurs d'événements tactiles avec la bonne configuration
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     // Gérer le redimensionnement de la fenêtre
     window.addEventListener('resize', () => {
