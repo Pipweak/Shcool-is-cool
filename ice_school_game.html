@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School is Cool</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      color: white;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .level-selector {
+      background: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .level-selector label {
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .level-selector select {
+      padding: 8px 15px;
+      border: 2px solid #667eea;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      background: white;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    .level-selector select:hover {
+      background: #f0f0ff;
+    }
+
+    .info {
+      color: white;
+      margin-bottom: 20px;
+      font-size: 18px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    #gameContainer {
+      position: relative;
+      display: inline-block;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      max-width: 95vw;
+      max-height: 70vh;
+    }
+
+    #grid {
+      border-collapse: collapse;
+      background: #ffffff;
+      width: 100%;
+      height: 100%;
+    }
+
+    td {
+      border: 1px solid #99ccff;
+      text-align: center;
+      vertical-align: middle;
+      position: relative;
+      padding: 0;
+    }
+    
+    td.ice-tile {
+      background: 
+        repeating-linear-gradient(
+          45deg,
+          #d4f1ff 0px,
+          #d4f1ff 3px,
+          #e6f7ff 3px,
+          #e6f7ff 6px,
+          #d4f1ff 6px,
+          #d4f1ff 9px,
+          #b3e5ff 9px,
+          #b3e5ff 12px
+        );
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    td.house-cell {
+      background: #90EE90;
+      border: 1px solid #7CC77C;
+    }
+
+    td.rock {
+      background: 
+        repeating-linear-gradient(
+          45deg,
+          #d4f1ff 0px,
+          #d4f1ff 3px,
+          #e6f7ff 3px,
+          #e6f7ff 6px,
+          #d4f1ff 6px,
+          #d4f1ff 9px,
+          #b3e5ff 9px,
+          #b3e5ff 12px
+        );
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    td.exit {
+      background: #ffd700;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .player {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      left: 0;
+      top: 0;
+      transition: transform 250ms ease-out;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+    }
+
+    #victoryMessage {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      text-align: center;
+      z-index: 100;
+      animation: popIn 0.3s ease-out;
+    }
+
+    @keyframes popIn {
+      0% { transform: translate(-50%, -50%) scale(0); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    #victoryMessage h2 {
+      color: #667eea;
+      margin: 0 0 20px 0;
+      font-size: 32px;
+    }
+
+    #victoryMessage button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin: 5px;
+      outline: none;
+    }
+
+    #victoryMessage button:hover, #victoryMessage button:focus {
+      background: #764ba2;
+      box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.3);
+    }
+
+    .controls {
+      color: white;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .controls p {
+      margin: 5px 0;
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .easy { background: #90EE90; color: #2d5016; }
+    .medium { background: #FFD700; color: #665200; }
+    .hard { background: #FF6B6B; color: #660000; }
+  </style>
+</head>
+<body>
+  <h1>🧑‍💼 School is Cool 🏫</h1>
+  
+  <div class="level-selector">
+    <label for="levelSelect">Niveau :</label>
+    <select id="levelSelect" onchange="changeLevel()">
+      <option value="1">Niveau 1 - Facile (10×10)</option>
+      <option value="2">Niveau 2 - Moyen (15×15)</option>
+      <option value="3">Niveau 3 - Difficile (20×20)</option>
+    </select>
+  </div>
+
+  <div class="info">
+    Déplacements: <span id="moves">0</span>
+    <span id="difficultyBadge" class="difficulty-badge easy">FACILE</span>
+  </div>
+
+  <div id="gameContainer">
+    <table id="grid"></table>
+  </div>
+
+  <div class="controls">
+    <p>🎮 Utilisez les flèches du clavier pour vous déplacer</p>
+    <p>⚠️ Attention : vous glissez sur la glace jusqu'au prochain obstacle !</p>
+    <button onclick="regenerateLevel()" style="margin-top: 15px; padding: 12px 25px; font-size: 16px; background: white; color: #667eea; border: 2px solid white; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s;" onmouseover="this.style.background='#667eea'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#667eea';">
+      🔄 Nouvelle grille
+    </button>
+  </div>
+
+  <div id="victoryMessage">
+    <h2>🎉 Bravo ! Vous avez atteint l'école ! 🎉</h2>
+    <p>Nombre de déplacements : <span id="finalMoves"></span></p>
+    <p>Difficulté : <span id="finalDifficulty"></span></p>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button id="btnNextLevel" onclick="nextLevel()">Niveau suivant</button>
+      <button id="btnRestart" onclick="regenerateLevel(); document.getElementById('victoryMessage').style.display = 'none';">Recommencer</button>
+    </div>
+  </div>
+
+  <script>
+    const GRID_SIZE_PX = 600; // Taille fixe de la grille en pixels
+    
+    const LEVELS = {
+      1: { size: 10, rocks: 15, name: "Facile", class: "easy" },
+      2: { size: 15, rocks: 35, name: "Moyen", class: "medium" },
+      3: { size: 20, rocks: 60, name: "Difficile", class: "hard" }
+    };
+
+    let currentLevel = 1;
+    let SIZE = LEVELS[currentLevel].size;
+    let ROCK_COUNT = LEVELS[currentLevel].rocks;
+    let CELL_SIZE = 0; // Sera calculé dynamiquement
+
+    let playerPos = { x: 0, y: 0 };
+    let exitPos = { x: 0, y: 0 };
+    let rocks = new Set();
+    let moves = 0;
+    let playerElement = null;
+    let cells = {};
+    let isMoving = false;
+    let bufferedMove = null;
+
+    function calculateCellSize() {
+      // Calculer la taille des cellules pour que la grille ait toujours la même taille
+      const gridWidth = Math.min(GRID_SIZE_PX, window.innerWidth * 0.9);
+      CELL_SIZE = Math.floor(gridWidth / (SIZE + 1)); // +1 pour la colonne de la maison
+      
+      // Appliquer la taille aux cellules
+      const style = document.createElement('style');
+      style.id = 'dynamic-cell-size';
+      const oldStyle = document.getElementById('dynamic-cell-size');
+      if (oldStyle) oldStyle.remove();
+      
+      const fontSize = Math.max(12, Math.floor(CELL_SIZE * 0.7));
+      style.textContent = `
+        td { 
+          width: ${CELL_SIZE}px; 
+          height: ${CELL_SIZE}px; 
+          font-size: ${fontSize}px;
+        }
+        #gameContainer {
+          width: ${(SIZE + 1) * CELL_SIZE + 20}px;
+          height: ${SIZE * CELL_SIZE + 20}px;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    function regenerateLevel() {
+      moves = 0;
+      document.getElementById('moves').textContent = moves;
+      isMoving = false;
+      bufferedMove = null;
+      initGame();
+    }
+
+    function changeLevel() {
+      const select = document.getElementById('levelSelect');
+      currentLevel = parseInt(select.value);
+      SIZE = LEVELS[currentLevel].size;
+      ROCK_COUNT = LEVELS[currentLevel].rocks;
+      moves = 0;
+      document.getElementById('moves').textContent = moves;
+      
+      // Mettre à jour le badge de difficulté
+      const badge = document.getElementById('difficultyBadge');
+      badge.textContent = LEVELS[currentLevel].name.toUpperCase();
+      badge.className = 'difficulty-badge ' + LEVELS[currentLevel].class;
+      
+      calculateCellSize();
+      initGame();
+    }
+
+    function nextLevel() {
+      if (currentLevel < 3) {
+        currentLevel++;
+        document.getElementById('levelSelect').value = currentLevel;
+        changeLevel();
+        document.getElementById('victoryMessage').style.display = 'none';
+      } else {
+        alert('🎊 Félicitations ! Vous avez terminé tous les niveaux ! 🎊');
+        location.reload();
+      }
+    }
+
+    function canReachExit() {
+      const visited = new Set();
+      const queue = [{x: playerPos.x, y: playerPos.y}];
+      visited.add(`${playerPos.x},${playerPos.y}`);
+      
+      const directions = [
+        {dx: 0, dy: -1},
+        {dx: 0, dy: 1},
+        {dx: -1, dy: 0},
+        {dx: 1, dy: 0}
+      ];
+      
+      while (queue.length > 0) {
+        const current = queue.shift();
+        
+        if (current.x === exitPos.x && current.y === exitPos.y) {
+          return true;
+        }
+        
+        for (const dir of directions) {
+          let newX = current.x;
+          let newY = current.y;
+          
+          while (true) {
+            const nextX = newX + dir.dx;
+            const nextY = newY + dir.dy;
+            
+            if (!isValidPosition(nextX, nextY) || isRock(nextX, nextY)) {
+              break;
+            }
+            
+            newX = nextX;
+            newY = nextY;
+          }
+          
+          const key = `${newX},${newY}`;
+          if (!visited.has(key)) {
+            visited.add(key);
+            queue.push({x: newX, y: newY});
+          }
+        }
+      }
+      
+      return false;
+    }
+
+    function initGame() {
+      playerPos = { x: 0, y: Math.floor(SIZE / 2) };
+      exitPos = { x: SIZE - 1, y: Math.floor(Math.random() * SIZE) };
+      
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      cells = {};
+
+      let attempts = 0;
+      do {
+        rocks.clear();
+        while (rocks.size < ROCK_COUNT) {
+          const x = Math.floor(Math.random() * SIZE);
+          const y = Math.floor(Math.random() * SIZE);
+          const key = `${x},${y}`;
+          
+          if ((x === playerPos.x && y === playerPos.y) || 
+              (x === exitPos.x && y === exitPos.y)) {
+            continue;
+          }
+          
+          rocks.add(key);
+        }
+        attempts++;
+      } while (!canReachExit() && attempts < 100);
+      
+      if (attempts >= 100) {
+        rocks.clear();
+        let reducedCount = Math.floor(ROCK_COUNT * 0.7);
+        while (rocks.size < reducedCount) {
+          const x = Math.floor(Math.random() * SIZE);
+          const y = Math.floor(Math.random() * SIZE);
+          const key = `${x},${y}`;
+          
+          if ((x === playerPos.x && y === playerPos.y) || 
+              (x === exitPos.x && y === exitPos.y)) {
+            continue;
+          }
+          
+          rocks.add(key);
+        }
+      }
+
+      // Recalculer les tailles avant de créer la grille
+      calculateCellSize();
+
+      for (let y = 0; y < SIZE; y++) {
+        const row = document.createElement('tr');
+        
+        const houseCell = document.createElement('td');
+        houseCell.classList.add('house-cell');
+        if (y === Math.floor(SIZE / 2)) {
+          houseCell.textContent = '🏚️';
+        }
+        row.appendChild(houseCell);
+        
+        for (let x = 0; x < SIZE; x++) {
+          const cell = document.createElement('td');
+          const key = `${x},${y}`;
+          cells[key] = cell;
+          
+          if (rocks.has(key)) {
+            cell.classList.add('rock');
+            cell.textContent = '🌲';
+          } else if (x === exitPos.x && y === exitPos.y) {
+            cell.classList.add('exit');
+            cell.textContent = '🏫';
+          } else {
+            // Ajouter la classe ice-tile pour les cellules vides
+            cell.classList.add('ice-tile');
+          }
+          
+          row.appendChild(cell);
+        }
+        grid.appendChild(row);
+      }
+
+      createPlayer();
+    }
+
+    function createPlayer() {
+      if (playerElement) {
+        playerElement.remove();
+      }
+
+      const cellKey = `${playerPos.x},${playerPos.y}`;
+      const cell = cells[cellKey];
+      
+      playerElement = document.createElement('div');
+      playerElement.className = 'player';
+      playerElement.textContent = '🧑‍💼';
+      
+      cell.appendChild(playerElement);
+    }
+
+    function movePlayerTo(x, y) {
+      const cellKey = `${x},${y}`;
+      const targetCell = cells[cellKey];
+      
+      if (targetCell) {
+        isMoving = true;
+        const currentCell = cells[`${playerPos.x},${playerPos.y}`];
+        const currentRect = currentCell.getBoundingClientRect();
+        const targetRect = targetCell.getBoundingClientRect();
+        
+        const deltaX = targetRect.left - currentRect.left;
+        const deltaY = targetRect.top - currentRect.top;
+        
+        playerElement.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        
+        setTimeout(() => {
+          playerPos.x = x;
+          playerPos.y = y;
+          playerElement.style.transform = '';
+          targetCell.appendChild(playerElement);
+          isMoving = false;
+          
+          // Si un mouvement est en buffer, l'exécuter
+          if (bufferedMove) {
+            const {dx, dy} = bufferedMove;
+            bufferedMove = null;
+            movePlayer(dx, dy);
+          }
+          
+          if (playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
+            showVictory();
+          }
+        }, 250);
+      }
+    }
+
+    function isRock(x, y) {
+      return rocks.has(`${x},${y}`);
+    }
+
+    function isValidPosition(x, y) {
+      return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
+    }
+
+    function movePlayer(dx, dy) {
+      // Si une animation est en cours, buffer le mouvement
+      if (isMoving) {
+        bufferedMove = {dx, dy};
+        return;
+      }
+      
+      let newX = playerPos.x;
+      let newY = playerPos.y;
+
+      while (true) {
+        const nextX = newX + dx;
+        const nextY = newY + dy;
+
+        if (!isValidPosition(nextX, nextY)) {
+          break;
+        }
+
+        if (isRock(nextX, nextY)) {
+          break;
+        }
+
+        newX = nextX;
+        newY = nextY;
+        
+        // Si on atteint l'école, s'arrêter immédiatement
+        if (newX === exitPos.x && newY === exitPos.y) {
+          break;
+        }
+      }
+
+      if (newX !== playerPos.x || newY !== playerPos.y) {
+        moves++;
+        document.getElementById('moves').textContent = moves;
+        movePlayerTo(newX, newY);
+      }
+    }
+
+    function showVictory() {
+      document.getElementById('finalMoves').textContent = moves;
+      document.getElementById('finalDifficulty').textContent = LEVELS[currentLevel].name;
+      document.getElementById('victoryMessage').style.display = 'block';
+      
+      // Mettre le focus sur "Recommencer" par défaut
+      setTimeout(() => {
+        document.getElementById('btnRestart').focus();
+      }, 100);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const victoryMsg = document.getElementById('victoryMessage');
+      
+      // Si la popup de victoire est affichée
+      if (victoryMsg.style.display === 'block') {
+        const btnNext = document.getElementById('btnNextLevel');
+        const btnRestart = document.getElementById('btnRestart');
+        const focused = document.activeElement;
+        
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          if (focused === btnRestart) {
+            btnNext.focus();
+          }
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          if (focused === btnNext) {
+            btnRestart.focus();
+          }
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (focused === btnNext) {
+            nextLevel();
+          } else if (focused === btnRestart) {
+            regenerateLevel();
+            victoryMsg.style.display = 'none';
+          }
+        }
+        return;
+      }
+
+      switch(e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          movePlayer(0, -1);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          movePlayer(0, 1);
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          movePlayer(-1, 0);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          movePlayer(1, 0);
+          break;
+      }
+    });
+
+    // Gérer le redimensionnement de la fenêtre
+    window.addEventListener('resize', () => {
+      calculateCellSize();
+    });
+
+    calculateCellSize();
+    initGame();
+  </script>
+</body>
+</html>
